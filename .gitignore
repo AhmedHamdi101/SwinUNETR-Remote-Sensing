@@ -1,2 +1,4 @@
 __pycache__
 .vscode
+models/__pycache__
+model_utils/__pycache__

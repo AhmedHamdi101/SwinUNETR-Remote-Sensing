@@ -3,24 +3,24 @@ import rasterio
 
 import numpy as np 
 import torch.nn as nn 
-from model import SSL_Model
+from model_utils.checkpointing import load_ckpt_from_state_dict
 
-model = SSL_Model()
+from models.ssl import SSLHead
+from models.SwinUNETR import SwinUNETR
 
-with rasterio.open("/home/amhamdi/Desktop/s2_b/idx_0-256.tif") as data:
-    array = data.read()
-    array = array.astype(np.float32)
-array = torch.tensor(array)
-array = torch.unsqueeze(array,dim = 0)
+model_2 = SwinUNETR(img_size=256 , in_channels=13 , out_channels=5 , )
+# model = SSLHead()
 
-
-out = model(array)
-# final_out = out[0]
-# print("*"*30)
-# print(out[2][-3].shape)
-# exit()
+model_2 = load_ckpt_from_state_dict("/home/amhamdi/Desktop/swinunetr_selfsupervised/checkpoint.pth",model_2 )
 
 
-print(out[0].shape)
-print(out[1].shape)
-print(out[2].shape)
+# with rasterio.open("/home/amhamdi/Desktop/s2_b/idx_0-256.tif") as data:
+#     array = data.read()
+#     array = array.astype(np.float32)
+# array = torch.tensor(array)
+# array = torch.unsqueeze(array,dim = 0)
+
+
+# out = model_2(array)
+
+# print(out.shape)
