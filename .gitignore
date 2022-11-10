@@ -3,3 +3,6 @@ __pycache__
 models/__pycache__
 model_utils/__pycache__
 checkpoint.pth
+data
+pre-processing
+pre-processing/__pycache__
