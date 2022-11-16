@@ -6,7 +6,7 @@ from monai.utils import ensure_tuple_rep
 
 
 class SSLHead(nn.Module):
-    def __init__(self, upsample="vae", dim=768):
+    def __init__(self, dim=768):
         super(SSLHead, self).__init__()
         patch_size = ensure_tuple_rep(2, 2)
         window_size = ensure_tuple_rep(7, 2)
@@ -30,64 +30,64 @@ class SSLHead(nn.Module):
         )
 
         self.inpainting_head = nn.Sequential(
-            nn.ConvTranspose2d(768, 384, 5 ),
+            nn.ConvTranspose2d(dim, dim//2, 5 ),
             nn.LeakyReLU(),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
 
-            nn.ConvTranspose2d(384, 192, 5 ),
+            nn.ConvTranspose2d(dim//2, dim//4, 5 ),
             nn.LeakyReLU(),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
 
 
-            nn.ConvTranspose2d(192, 96, 5 ),
+            nn.ConvTranspose2d(dim//4, dim//8, 5 ),
             nn.LeakyReLU(),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
 
-            nn.ConvTranspose2d(96, 48, 5 ),
+            nn.ConvTranspose2d(dim//8, dim//16, 5 ),
             nn.LeakyReLU(),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
             
-            nn.ConvTranspose2d(48, 24, 5 ),
+            nn.ConvTranspose2d(dim//16, dim//32, 5 ),
             nn.LeakyReLU(),
 
-            nn.ConvTranspose2d(24, 12, 5 ),
+            nn.ConvTranspose2d(dim//32, dim//64, 5 ),
             nn.LeakyReLU()
             )
 
         self.channel_reconstruction = nn.Sequential(
-            nn.ConvTranspose2d(768, 384, 5 ),
+            nn.ConvTranspose2d(dim, dim//2, 5 ),
             nn.LeakyReLU(),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
 
-            nn.ConvTranspose2d(384, 192, 5 ),
+            nn.ConvTranspose2d(dim//2, dim//4, 5 ),
             nn.LeakyReLU(),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
 
 
-            nn.ConvTranspose2d(192, 96, 5 ),
+            nn.ConvTranspose2d(dim//4, dim//8, 5 ),
             nn.LeakyReLU(),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
 
-            nn.ConvTranspose2d(96, 48, 5 ),
+            nn.ConvTranspose2d(dim//8, dim//16, 5 ),
             nn.LeakyReLU(),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
             
-            nn.ConvTranspose2d(48, 24, 5 ),
+            nn.ConvTranspose2d(dim//16, dim//32, 5 ),
             nn.LeakyReLU(),
 
-            nn.ConvTranspose2d(24, 12, 3 ),
+            nn.ConvTranspose2d(dim//32, dim//64, 3 ),
             nn.LeakyReLU(),
-            nn.ConvTranspose2d(12, 1, 3 ),
+            nn.ConvTranspose2d(dim//64, 1, 3 ),
             nn.LeakyReLU()
             )
 
         self.triplet_head = nn.Sequential(
-            nn.Conv2d(768,384,3),
+            nn.Conv2d(dim,dim//2,3),
             nn.LeakyReLU(),
-            nn.Conv2d(384,192,3),
+            nn.Conv2d(dim//2,dim//4,3),
             nn.LeakyReLU(),
             nn.Flatten(start_dim=1,end_dim=-1),
-            nn.Linear(3072,2048),
+            nn.Linear(dim*4,2048),
             nn.LeakyReLU(),
             nn.Linear(2048,1024),
             nn.LeakyReLU(),

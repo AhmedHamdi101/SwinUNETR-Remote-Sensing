@@ -1,8 +1,11 @@
 __pycache__
+checkpoints
+comet-default
 .vscode
+main_utils/__pycache__
 models/__pycache__
 model_utils/__pycache__
-checkpoint.pth
 data
+cropped_data
 pre-processing
-pre-processing/__pycache__
+Untitled.ipynb
