@@ -9,3 +9,6 @@ data
 cropped_data
 pre-processing
 Untitled.ipynb
+Validation_output/
+prj_utils/__pycache__
+*/__pycache__

@@ -97,6 +97,28 @@ class SSLHead(nn.Module):
         )
 
 
+        self.swinViT.apply(self.init_weights)
+        self.inpainting_head.apply(self.init_weights)
+        self.channel_reconstruction.apply(self.init_weights)
+        self.triplet_head.apply(self.init_weights)
+
+
+    def init_weights(self,m):
+        
+        if isinstance(m, nn.Linear):
+            torch.nn.init.xavier_uniform_(m.weight)
+
+        if isinstance(m, nn.Conv2d):
+            torch.nn.init.xavier_uniform_(m.weight)
+
+        if isinstance(m, nn.ConvTranspose2d):
+            torch.nn.init.xavier_uniform_(m.weight)
+
+
+            
+
+
+
     def forward(self, x):
         x_out = self.swinViT(x.contiguous())[4]
         inpainting_output = self.inpainting_head(x_out)
