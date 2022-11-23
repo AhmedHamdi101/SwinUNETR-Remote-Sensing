@@ -40,15 +40,16 @@ def normalize_tensor(mean , std , tensor):
 
 def drop_channel(input):
 
-    index = random.randint(len(input))
-    sample_GT = torch.unsqueeze(input[index].detach().clone() , dim = 0)
-    volume_GT = torch.cat([input[0:index] , input[index+1 :]  ])
-    zeros = torch.zeros(input[index].shape)
-    input[index]= zeros
+    input_real = torch.clone(input)
+    index = random.randint(len(input_real))
+    sample_GT = torch.unsqueeze(input_real[index].detach().clone() , dim = 0)
+    volume_GT = torch.cat([input_real[0:index] , input_real[index+1 :]  ])
+    zeros = torch.zeros(input_real[index].shape)
+    input_real[index]= zeros
 
-    return input , sample_GT , volume_GT , index
+    return input_real , sample_GT , volume_GT , index
 
 def volume_inpainting(input):
-    volume_inpainting_layer = Dropout(p=0.2)
+    volume_inpainting_layer = Dropout(p=0.05 , inplace = False)
     input = volume_inpainting_layer(input)
     return input

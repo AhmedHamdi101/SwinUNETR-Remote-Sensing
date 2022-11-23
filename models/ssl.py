@@ -125,4 +125,4 @@ class SSLHead(nn.Module):
         reconstruction_output = self.channel_reconstruction(x_out)
         triplet_output = self.triplet_head(x_out)
         return [inpainting_output , reconstruction_output , triplet_output]
-        
+

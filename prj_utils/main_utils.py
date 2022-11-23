@@ -8,14 +8,14 @@ import pytorch_lightning as pl
 from prj_utils.model_utils import load_from_pretrained_weights
 
 def main_validate(args):
-    dataloaders = SentinelDataloader(root_img_dir="/home/amhamdi/Desktop/swinunetr_selfsupervised/cropped_data" , train_df="/home/amhamdi/Desktop/swinunetr_selfsupervised/train_samples.csv",
+    dataloaders = SentinelDataloader(root_img_dir="/data/private_sentinel_cropped_data/" , train_df="/home/amhamdi/Desktop/swinunetr_selfsupervised/train_samples.csv",
                                         valid_df="/home/amhamdi/Desktop/swinunetr_selfsupervised/valid_samples.csv" , test_df="/home/amhamdi/Desktop/swinunetr_selfsupervised/valid_samples.csv",
                                         batch_size=1 , num_workers= 12)
     dataloaders.setup(stage="fit")
     validation_dataloader = dataloaders.val_dataloader()
 
     model = SSL_PTLModule(0.0001)
-    model = load_from_pretrained_weights(model , "/home/amhamdi/Desktop/swinunetr_selfsupervised/checkpoints/checkpoint-epoch=09-step=23500--v1.ckpt")
+    model = load_from_pretrained_weights(model , "/home/amhamdi/Desktop/checkpoint-epoch=06-step=17500-.ckpt")
 
     trainer = pl.Trainer(accelerator="gpu",
                             devices=1,
@@ -41,7 +41,7 @@ def main_train(args):
             save_top_k=-1,
             every_n_train_steps=500)
 
-    dataloaders = SentinelDataloader(root_img_dir="/home/amhamdi/Desktop/swinunetr_selfsupervised/cropped_data" , train_df="/home/amhamdi/Desktop/swinunetr_selfsupervised/train_samples.csv",
+    dataloaders = SentinelDataloader(root_img_dir="/data/private_sentinel_cropped_data/" , train_df="/home/amhamdi/Desktop/swinunetr_selfsupervised/train_samples.csv",
                                         valid_df="/home/amhamdi/Desktop/swinunetr_selfsupervised/valid_samples.csv" , test_df="/home/amhamdi/Desktop/swinunetr_selfsupervised/valid_samples.csv",
                                         batch_size=6 , num_workers= 6)
     dataloaders.setup(stage="fit")

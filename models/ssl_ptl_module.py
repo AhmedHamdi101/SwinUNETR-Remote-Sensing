@@ -5,7 +5,8 @@ from torch.nn import TripletMarginLoss , L1Loss
 from torchmetrics import PeakSignalNoiseRatio , StructuralSimilarityIndexMeasure
 
 from models.ssl import SSLHead 
-from prj_utils.model_utils import save_outputs
+from prj_utils.model_utils import save_outputs , unormalize
+
 class SSL_PTLModule(pl.LightningModule):
 
     def __init__(self,learning_rate):
@@ -55,23 +56,27 @@ class SSL_PTLModule(pl.LightningModule):
         self.channel_GT = batch["Y_CHANNEL"]
         self.volume_GT = batch["Y_INVOLUME"]
 
+        self.channel_idx = batch["CHANNEL_IDX"]
+
         predictions = self(self.input)
         
         inpainting_output , reconstruction_output , _ = predictions[0] , predictions[1] , predictions[2]
-       
+
         triplet_positive = self(self.positive_img)[2]
         triplet_negative = self(self.negative_img)[2]
 
         triplet_loss_value , inpainting_loss_value , reconstruction_loss_value = self.calculate_loss( self.volume_GT , self.channel_GT , predictions , triplet_positive , triplet_negative)
         loss = (triplet_loss_value + inpainting_loss_value + reconstruction_loss_value) / 3
 
-        
+
+        self.channel_GT, reconstruction_output , self.volume_GT , inpainting_output = unormalize(self.channel_GT , reconstruction_output , self.volume_GT , inpainting_output , self.channel_idx)
+
         psnr_channel = self.psnr(reconstruction_output , self.channel_GT)
         psnr_inpainting = self.psnr(inpainting_output , self.volume_GT)
         
 
-        # ssim_channel = self.ssim(reconstruction_output , self.channel_GT)
-        # ssim_inpainting = self.ssim(inpainting_output , self.volume_GT)
+        ssim_channel = self.ssim(reconstruction_output , self.channel_GT)
+        ssim_inpainting = self.ssim(inpainting_output , self.volume_GT)
 
         self.log("Train_Total_loss", loss ,  batch_size=batch_size)
         self.log("Train_Triplet_loss", triplet_loss_value ,  batch_size=batch_size)
@@ -81,8 +86,8 @@ class SSL_PTLModule(pl.LightningModule):
         self.log("Train_Channel_PSNR",psnr_channel ,  batch_size=batch_size)
         self.log("Train_Inpainting_PSNR",psnr_inpainting,  batch_size=batch_size)
 
-        # self.log("Train_Channel_SSIM",ssim_channel ,  batch_size=batch_size)
-        # self.log("Train_Inpainting_SSIM",ssim_inpainting,  batch_size=batch_size)
+        self.log("Train_Channel_SSIM",ssim_channel ,  batch_size=batch_size)
+        self.log("Train_Inpainting_SSIM",ssim_inpainting,  batch_size=batch_size)
         
         return loss
 
@@ -107,18 +112,20 @@ class SSL_PTLModule(pl.LightningModule):
         predictions = self(self.input)
         
         inpainting_output , reconstruction_output , _ = predictions[0] , predictions[1] , predictions[2]
-       
+        
         triplet_positive = self(self.positive_img)[2]
         triplet_negative = self(self.negative_img)[2]
 
         triplet_loss_value , inpainting_loss_value , reconstruction_loss_value = self.calculate_loss( self.volume_GT , self.channel_GT , predictions , triplet_positive , triplet_negative)
         loss = (triplet_loss_value + inpainting_loss_value + reconstruction_loss_value) / 3
         
+        self.channel_GT, reconstruction_output , self.volume_GT , inpainting_output = unormalize(self.channel_GT , reconstruction_output , self.volume_GT , inpainting_output , self.channel_idx)
+        
         psnr_channel = self.psnr(reconstruction_output , self.channel_GT)
         psnr_inpainting = self.psnr(inpainting_output , self.volume_GT)
         
-        # ssim_channel = self.ssim(reconstruction_output , self.channel_GT)
-        # ssim_inpainting = self.ssim(inpainting_output , self.volume_GT)
+        ssim_channel = self.ssim(reconstruction_output , self.channel_GT)
+        ssim_inpainting = self.ssim(inpainting_output , self.volume_GT)
 
         self.log("Validation_Total_loss", loss , batch_size=batch_size)
         self.log("Validation_Triplet_loss", triplet_loss_value ,  batch_size=batch_size)
@@ -127,11 +134,11 @@ class SSL_PTLModule(pl.LightningModule):
 
         self.log("Validation_Channel_PSNR",psnr_channel , batch_size=batch_size)
         self.log("Validation_Inpainting_PSNR",psnr_inpainting, batch_size=batch_size)
+
+        self.log("Validation_Channel_SSIM",ssim_channel ,  batch_size=batch_size)
+        self.log("Validation_Inpainting_SSIM",ssim_inpainting,  batch_size=batch_size)
         
-        # self.log("Validation_Channel_SSIM",ssim_channel ,  batch_size=batch_size)
-        # self.log("Validation_Inpainting_SSIM",ssim_inpainting,  batch_size=batch_size)
-        
-        # save_outputs(self.image_GT_path , self.channel_GT , reconstruction_output , self.volume_GT , inpainting_output , self.channel_idx,"/home/amhamdi/Desktop/swinunetr_selfsupervised/Validation_output")
+        # save_outputs(self.image_GT_path , self.channel_GT , reconstruction_output , self.volume_GT , inpainting_output , self.channel_idx,"/home/amhamdi/Desktop/temp")
 
 
         return loss
